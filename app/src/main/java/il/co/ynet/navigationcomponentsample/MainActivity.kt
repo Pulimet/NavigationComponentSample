@@ -5,11 +5,11 @@ import android.view.Menu
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import kotlinx.android.synthetic.main.activity_main.*
@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
 
         menuDrawer = toolbar.navigationIcon as DrawerArrowDrawable
         setDrawerListener()
+        fixNavigationIconBehavior()
     }
 
     private fun setDrawerListener() {
@@ -55,8 +56,20 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    private fun isMenuDrawerIsAnArrowNow() = menuDrawer.progress == 1.0f
+
+    private fun fixNavigationIconBehavior() {
+        toolbar.setNavigationOnClickListener {
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START)
+            } else {
+                if (isMenuDrawerIsAnArrowNow()) {
+                    navController.navigateUp()
+                } else {
+                    drawerLayout.openDrawer(GravityCompat.START)
+                }
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
